@@ -1,0 +1,6 @@
+{
+  "name": "Baduanjin Qigong Guide",
+  "description": "An interactive guide to Baduanjin (Eight Pieces of Brocade) Qigong, featuring real video demonstrations, breathing exercises, and a guided practice session.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

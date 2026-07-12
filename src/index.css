@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Noto+Serif+SC:wght@400;600;700&family=Libre+Franklin:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@theme {
+  --color-ink: #1B211D;
+  --color-ink-2: #242B25;
+  --color-paper: #EDE7D8;
+  --color-paper-2: #E4DCC7;
+  --color-jade: #3F6B5C;
+  --color-jade-light: #8CB6A4;
+  --color-brass: #B7924B;
+  --color-cinnabar: #A8402B;
+  --color-ink-soft: #4A4F45;
+  --color-paper-soft: #CFC9B6;
+
+  --font-sans: "Libre Franklin", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-cjk: "Noto Serif SC", serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Custom styles from original */
+.breath-breathe-animation {
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(0.55);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  #cheatsheet {
+    display: block !important;
+    background: white !important;
+    color: black !important;
+  }
+}
