@@ -37,7 +37,7 @@ export default function MovementSimulation({
   const currentMeridian = meridianMap[movement.id] || { meridian: "Ren & Du Channels", pointName: "Dantian", pointCode: "CV-4" };
 
   // View modes: 'video' (real human demonstration/custom clip) or 'simulation' (skeletal vector tracing)
-  const [viewMode, setViewMode] = useState<'simulation' | 'video'>('video');
+  const [viewMode, setViewMode] = useState<'simulation' | 'video'>('simulation');
 
   // Local loop states for when the global session is not actively driving this card
   const [localPlaying, setLocalPlaying] = useState(true);

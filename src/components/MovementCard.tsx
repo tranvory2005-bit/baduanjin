@@ -40,6 +40,25 @@ export default function MovementCard({
     }
   }, [isActive, isPracticing, viewMode]);
 
+  const resolveAssetPath = (filename: string) => {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    
+    // If we are on github.io and the path is /repo-name (no trailing slash)
+    // we want to load it from /repo-name/filename
+    if (pathname && !pathname.endsWith('/')) {
+      const lastSegment = pathname.substring(pathname.lastIndexOf('/') + 1);
+      if (!lastSegment.includes('.')) {
+        return `${origin}${pathname}/${filename}`;
+      } else {
+        const dir = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+        return `${origin}${dir}${filename}`;
+      }
+    }
+    
+    return `${origin}${pathname}${filename}`;
+  };
+
   const getVideoSources = (id: string) => {
     const index = id.replace('m', '');
     const names = [`style${index}`, `Style${index}`];
@@ -51,6 +70,7 @@ export default function MovementCard({
     
     const sources: string[] = [];
     names.forEach(name => {
+      // Relative paths
       sources.push(
         `${name}.mp4`,
         `videos/${name}.mp4`,
@@ -58,6 +78,15 @@ export default function MovementCard({
         `${name}.webm`,
         `videos/${name}.webm`,
         `assets/${name}.webm`
+      );
+      // Absolute resolved paths (extremely robust on GitHub Pages)
+      sources.push(
+        resolveAssetPath(`${name}.mp4`),
+        resolveAssetPath(`videos/${name}.mp4`),
+        resolveAssetPath(`assets/${name}.mp4`),
+        resolveAssetPath(`${name}.webm`),
+        resolveAssetPath(`videos/${name}.webm`),
+        resolveAssetPath(`assets/${name}.webm`)
       );
     });
     return sources;
@@ -157,6 +186,7 @@ export default function MovementCard({
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-black">
                     <video
+                      key={movement.id}
                       ref={videoRef}
                       controls
                       loop
