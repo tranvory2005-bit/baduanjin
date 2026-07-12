@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Movement } from '../types';
 import { Play, Square, Info, Activity } from 'lucide-react';
@@ -23,6 +23,37 @@ export default function MovementCard({
 }: MovementCardProps) {
   const isInk = movement.tone === 'ink';
   
+  const [viewMode, setViewMode] = useState<'visualizer' | 'video'>('visualizer');
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Auto-play / pause video when the practice state changes
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isActive || isPracticing) {
+        videoRef.current.play().catch(err => {
+          // Playback might be blocked by browser autoplay policy before user interaction
+          console.log("Video playback auto-play was prevented:", err);
+        });
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isActive, isPracticing, viewMode]);
+
+  const getVideoSources = (id: string) => {
+    const index = id.replace('m', '');
+    const name = `style${index}`;
+    return [
+      `${name}.mp4`,
+      `videos/${name}.mp4`,
+      `assets/${name}.mp4`,
+      // support potential typo in style8
+      ...(index === '8' ? ['stye8.mp4', 'videos/stye8.mp4', 'assets/stye8.mp4'] : []),
+      `${name}.webm`,
+      `videos/${name}.webm`,
+    ];
+  };
+
   // Choose colors based on light (paper) or dark (ink) tone
   const bgClass = isInk ? 'bg-ink-2 text-paper' : 'bg-[#F2ECE0] text-ink';
   const borderClass = isInk ? 'border-[#3a4038]' : 'border-[#E2DBC8]';
@@ -68,28 +99,83 @@ export default function MovementCard({
         {/* Content Body Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          {/* Left Column: Animated Movement Simulator */}
+          {/* Left Column: Animated Movement Simulator & Video Demonstration */}
           <div className="lg:col-span-6 space-y-4">
+            {/* Tab selection */}
+            <div className="flex gap-2 p-1 bg-black/5 dark:bg-white/5 border border-[#E2DBC8]/50 dark:border-[#3a4038]/50 rounded-lg w-fit no-print">
+              <button
+                onClick={() => setViewMode('visualizer')}
+                className={`px-4 py-1.5 text-xs font-mono tracking-wider uppercase rounded-md transition-all duration-200 cursor-pointer ${
+                  viewMode === 'visualizer'
+                    ? isInk
+                      ? 'bg-brass text-ink font-semibold shadow-sm'
+                      : 'bg-jade text-paper font-semibold shadow-sm'
+                    : 'text-ink-soft hover:text-ink'
+                }`}
+              >
+                Qi Visualizer
+              </button>
+              <button
+                onClick={() => setViewMode('video')}
+                className={`px-4 py-1.5 text-xs font-mono tracking-wider uppercase rounded-md transition-all duration-200 cursor-pointer ${
+                  viewMode === 'video'
+                    ? isInk
+                      ? 'bg-brass text-ink font-semibold shadow-sm'
+                      : 'bg-jade text-paper font-semibold shadow-sm'
+                    : 'text-ink-soft hover:text-ink'
+                }`}
+              >
+                Video Demo
+              </button>
+            </div>
+
             <div className={`border p-3 rounded-lg overflow-hidden ${borderClass} bg-black/10 shadow-md`}>
               <div className="relative w-full h-[450px] sm:h-[550px] md:h-[650px] lg:h-[720px] rounded overflow-hidden bg-black/40">
-                <MovementSimulation
-                  movement={movement}
-                  isGlobalActive={isActive}
-                  isGlobalPracticing={isPracticing}
-                  globalIsBreathingIn={isBreathingIn}
-                  currentRep={currentRep}
-                />
-                
-                {/* Visual Overlay indicator */}
-                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-[10px] font-mono px-2 py-0.5 rounded text-white tracking-widest uppercase z-10 pointer-events-none">
-                  Qi Visualizer
-                </div>
+                {viewMode === 'visualizer' ? (
+                  <>
+                    <MovementSimulation
+                      movement={movement}
+                      isGlobalActive={isActive}
+                      isGlobalPracticing={isPracticing}
+                      globalIsBreathingIn={isBreathingIn}
+                      currentRep={currentRep}
+                    />
+                    {/* Visual Overlay indicator */}
+                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-[10px] font-mono px-2 py-0.5 rounded text-white tracking-widest uppercase z-10 pointer-events-none">
+                      Qi Visualizer
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-black">
+                    <video
+                      ref={videoRef}
+                      controls
+                      loop
+                      playsInline
+                      className="w-full h-full object-contain"
+                    >
+                      {getVideoSources(movement.id).map((src, idx) => (
+                        <source key={idx} src={src} type={src.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+                      ))}
+                      Your browser does not support the video tag.
+                    </video>
+                    {/* Visual Overlay indicator */}
+                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-[10px] font-mono px-2 py-0.5 rounded text-white tracking-widest uppercase z-10 pointer-events-none">
+                      Video Demo
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
             <p className="text-xs text-ink-soft leading-relaxed flex items-start gap-1.5 px-1">
               <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 opacity-80" />
-              <span>Interactive visualizer demonstrating the optimal physical posture, joint coordination, and breathing cycle of {movement.en}.</span>
+              <span>
+                {viewMode === 'visualizer' 
+                  ? `Interactive visualizer demonstrating the optimal physical posture, joint coordination, and breathing cycle of ${movement.en}.`
+                  : `Video demonstration of ${movement.en}. Please save style1.mp4 to style8.mp4 inside your public/ folder (e.g. public/style1.mp4).`
+                }
+              </span>
             </p>
           </div>
 
