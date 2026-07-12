@@ -42,16 +42,25 @@ export default function MovementCard({
 
   const getVideoSources = (id: string) => {
     const index = id.replace('m', '');
-    const name = `style${index}`;
-    return [
-      `${name}.mp4`,
-      `videos/${name}.mp4`,
-      `assets/${name}.mp4`,
-      // support potential typo in style8
-      ...(index === '8' ? ['stye8.mp4', 'videos/stye8.mp4', 'assets/stye8.mp4'] : []),
-      `${name}.webm`,
-      `videos/${name}.webm`,
-    ];
+    const names = [`style${index}`, `Style${index}`];
+    
+    // Support potential typos for style 8
+    if (index === '8') {
+      names.push('stye8', 'Stye8');
+    }
+    
+    const sources: string[] = [];
+    names.forEach(name => {
+      sources.push(
+        `${name}.mp4`,
+        `videos/${name}.mp4`,
+        `assets/${name}.mp4`,
+        `${name}.webm`,
+        `videos/${name}.webm`,
+        `assets/${name}.webm`
+      );
+    });
+    return sources;
   };
 
   // Choose colors based on light (paper) or dark (ink) tone
